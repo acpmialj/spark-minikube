@@ -1,30 +1,30 @@
 # Despliegue de Spark con Kubernetes
 
-## Want to learn how to build this?
+## Fuente
 
-Check out the [post](https://testdriven.io/deploying-spark-on-kubernetes).
+Ver [post](https://testdriven.io/deploying-spark-on-kubernetes).
 
-## Want to use this project?
+## Pasos
 
-### Minikube Setup
+### Puesta en marcha de Minikube
 
-Install and run [Minikube](https://kubernetes.io/docs/setup/minikube/):
+Instalar y ejecutar [Minikube](https://kubernetes.io/docs/setup/minikube/):
 
 1. Install a  [Hypervisor](https://kubernetes.io/docs/tasks/tools/install-minikube/#install-a-hypervisor) (like [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [HyperKit](https://github.com/moby/hyperkit)) to manage virtual machines
 1. Install and Set Up [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to deploy and manage apps on Kubernetes
 1. Install [Minikube](https://github.com/kubernetes/minikube/releases)
 
-Start the cluster:
+Arrancar cluster:
 
 ```sh
 $ minikube start
 ```
 
-Build the Docker image:
+Construir la imagen Docker image:
 
 ```sh
 $ eval $(minikube docker-env)
-$ docker build -t spark-hadoop:2.2.1 -f ./docker/Dockerfile ./docker
+$ docker build -t spark-hadoop:3.2.0 -f ./docker/Dockerfile ./docker
 ```
 
 Creamos deployments y services:
