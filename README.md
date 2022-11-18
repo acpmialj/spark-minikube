@@ -10,11 +10,11 @@ Ver [post](https://testdriven.io/deploying-spark-on-kubernetes).
 
 Instalar y ejecutar [Minikube](https://kubernetes.io/docs/setup/minikube/):
 
-1. Install a  [Hypervisor](https://kubernetes.io/docs/tasks/tools/install-minikube/#install-a-hypervisor) (like [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [HyperKit](https://github.com/moby/hyperkit)) to manage virtual machines
-1. Install and Set Up [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) to deploy and manage apps on Kubernetes
-1. Install [Minikube](https://github.com/kubernetes/minikube/releases)
+1. Necesitamos un hipervisor  [Hypervisor](https://kubernetes.io/docs/tasks/tools/install-minikube/#install-a-hypervisor) (por ejemplo [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [HyperKit](https://github.com/moby/hyperkit)) para manejar MVs -- usaremos Minikube dentro de una MV Ubuntu.
+1. Instalamos [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) en la MV Ubuntu para gestionar clústeres Kubernetes.
+1. Instalamos [Minikube](https://github.com/kubernetes/minikube/releases) en la MV Ubuntu.
 
-Arrancar cluster:
+Tras tener clonado este repositorio, arrancamos un cluster Minikube. Nos aseguraremos de que nuestro directorio de trabajo es ~/spark-minikube:
 
 ```sh
 $ minikube start
@@ -55,7 +55,7 @@ $ kubectl exec spark-master-dbc47bc9-t6v84 -it -- \
     pyspark --conf spark.driver.bindAddress=172.17.0.6 --conf spark.driver.host=172.17.0.6
 ```
 
-Una vez veamos el prompt, podremos escribir código Python.
+Una vez veamos el prompt, (si no aparece, pulsar Return) podremos escribir código Python.
 
 ```sh
 Welcome to
@@ -81,4 +81,32 @@ SparkSession available as 'spark'.
 >>> sc.stop()
 >>> exit()
 ```
+
 ¡Listo!
+
+Podemos hacer operaciones de limpieza
+
+```sh
+$ kubectl get deployment
+NAME           READY   UP-TO-DATE   AVAILABLE   AGE
+spark-master   1/1     1            1           65m
+spark-worker   2/2     2            2           65m
+
+$ kubectl get service
+NAME           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
+kubernetes     ClusterIP   10.96.0.1       <none>        443/TCP             71m
+spark-master   ClusterIP   10.106.195.67   <none>        8080/TCP,7077/TCP   65m
+
+$ kubectl delete deployment spark-master
+deployment.apps "spark-master" deleted
+$ kubectl delete deployment spark-worker
+deployment.apps "spark-worker" deleted
+$ kubectl delete service spark-master
+service "spark-master" deleted
+
+$ minikube delete
+* Deleting "minikube" in docker ...
+* Deleting container "minikube" ...
+* Removing /home/osboxes/.minikube/machines/minikube ...
+* Removed all traces of the "minikube" cluster.
+```
