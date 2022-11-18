@@ -1,4 +1,4 @@
-# Deploying Spark on Kubernetes
+# Despliegue de Spark con Kubernetes
 
 ## Want to learn how to build this?
 
@@ -17,8 +17,7 @@ Install and run [Minikube](https://kubernetes.io/docs/setup/minikube/):
 Start the cluster:
 
 ```sh
-$ minikube start --memory 8192 --cpus 4
-$ minikube dashboard
+$ minikube start
 ```
 
 Build the Docker image:
@@ -28,20 +27,58 @@ $ eval $(minikube docker-env)
 $ docker build -t spark-hadoop:2.2.1 -f ./docker/Dockerfile ./docker
 ```
 
-Create the deployments and services:
+Creamos deployments y services:
 
 ```sh
 $ kubectl create -f ./kubernetes/spark-master-deployment.yaml
 $ kubectl create -f ./kubernetes/spark-master-service.yaml
 $ kubectl create -f ./kubernetes/spark-worker-deployment.yaml
 $ minikube addons enable ingress
+# Es posible que el siguiente comando haya que ejecutarlo un par de veces, tarda
 $ kubectl apply -f ./kubernetes/minikube-ingress.yaml
 ```
 
-Add an entry to /etc/hosts:
-
+Vemos nuestros contenedores. Nos fijamos en el nombre y la dirección IP del que empieza por spark-master:
 ```sh
-$ echo "$(minikube ip) spark-kubernetes" | sudo tee -a /etc/hosts
+$ kubectl get pods -o wide
+
+NAME                            READY   STATUS    RESTARTS   AGE     IP           NODE       NOMINATED NODE   READINESS GATES
+spark-master-dbc47bc9-t6v84     1/1     Running   0          7m35s   172.17.0.6   minikube   <none>           <none>
+spark-worker-795dc47587-5ch8f   1/1     Running   0          7m24s   172.17.0.9   minikube   <none>           <none>
+spark-worker-795dc47587-fvcf6   1/1     Running   0          7m24s   172.17.0.7   minikube   <none>           <none>
 ```
 
-Test it out in the browser at [http://spark-kubernetes/](http://spark-kubernetes/).
+Lanzamos pyspark en el master. Tenemos que usar el nombre y la dirección IP correspondiente:
+
+```sh
+$ kubectl exec spark-master-dbc47bc9-t6v84 -it -- \
+    pyspark --conf spark.driver.bindAddress=172.17.0.6 --conf spark.driver.host=172.17.0.6
+```
+
+Una vez veamos el prompt, podremos escribir código Python.
+
+```sh
+Welcome to
+      ____              __
+     / __/__  ___ _____/ /__
+    _\ \/ _ \/ _ `/ __/  '_/
+   /__ / .__/\_,_/_/ /_/\_\   version 3.2.0
+      /_/
+
+Using Python version 3.9.2 (default, Feb 28 2021 17:03:44)
+Spark context Web UI available at http://172.17.0.3:4040
+Spark context available as 'sc' (master = spark://spark-master:7077, app id = app-20221118101454-0000).
+SparkSession available as 'spark'.
+>>>
+>>> words = 'the quick brown fox jumps over the\
+...         lazy dog the quick brown fox jumps over the lazy dog'
+>>> sc = SparkContext.getOrCreate()
+>>> seq = words.split()
+>>> data = sc.parallelize(seq)
+>>> counts = data.map(lambda word: (word, 1)).reduceByKey(lambda a, b: a + b).collect()
+>>> dict(counts)
+{'quick': 2, 'the': 4, 'brown': 2, 'fox': 2, 'jumps': 2, 'over': 2, 'lazy': 2, 'dog': 2}
+>>> sc.stop()
+>>> exit()
+```
+¡Listo!
