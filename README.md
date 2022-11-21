@@ -55,6 +55,12 @@ spark-worker-795dc47587-5ch8f   1/1     Running   0          7m24s   172.17.0.9 
 spark-worker-795dc47587-fvcf6   1/1     Running   0          7m24s   172.17.0.7   minikube   <none>           <none>
 ```
 
+Si todo va bien, podemos hacer una modificación en /etc/hosts para poder conectarnos al Web UI del Spark master:
+```sh
+echo "$(minikube ip) spark-kubernetes" | sudo tee -a /etc/hosts
+```
+Y luego conectarnos vía web a: http://spark-kubernetes/. 
+
 Lanzamos pyspark en el master. Tenemos que usar el nombre y la dirección IP correspondiente:
 
 ```sh
