@@ -27,6 +27,13 @@ $ eval $(minikube docker-env)
 $ docker build -t spark-hadoop:3.2.0 -f ./docker/Dockerfile ./docker
 ```
 
+Alternativa más rápida a "docker build": descarga la imagen la lista de Docker Hub y reetiquétala:
+```sh
+$ docker pull acpmialj/ipmd:spark_hadoop_3.2.0
+$ docker tag acpmialj/ipmd:spark_hadoop_3.2.0 spark-hadoop:3.2.0
+```
+
+
 Creamos deployments y services:
 
 ```sh
