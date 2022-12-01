@@ -1,29 +1,23 @@
 # Despliegue de Spark con Kubernetes
 
-## Fuente
+## Clonar este repositorio
 
-Ver [post](https://testdriven.io/deploying-spark-on-kubernetes).
+Clonar el repositorio. Nos aseguraremos de que nuestro directorio de trabajo es ~/spark-minikube. 
 
-## Pasos
+## Puesta en marcha de Minikube
 
-### Puesta en marcha de Minikube
-
-Instalar y ejecutar [Minikube](https://kubernetes.io/docs/setup/minikube/):
-
-1. Necesitamos un hipervisor  [Hypervisor](https://kubernetes.io/docs/tasks/tools/install-minikube/#install-a-hypervisor) (por ejemplo [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or [HyperKit](https://github.com/moby/hyperkit)) para manejar MVs -- usaremos Minikube dentro de una MV Ubuntu.
-1. Instalamos [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) en la MV Ubuntu para gestionar clústeres Kubernetes.
-1. Instalamos [Minikube](https://github.com/kubernetes/minikube/releases) en la MV Ubuntu.
-
-Tras tener clonado este repositorio, arrancamos un cluster Minikube. Nos aseguraremos de que nuestro directorio de trabajo es ~/spark-minikube:
+Si no está ya hecho, instalar [Minikube](https://kubernetes.io/docs/setup/minikube/). Iniciamos Minikube con:
 
 ```sh
 $ minikube start
+$ eval $(minikube docker-env)
 ```
+
+## Puesta en marcha del clúster Spark
 
 Construir la imagen Docker image:
 
 ```sh
-$ eval $(minikube docker-env)
 $ docker build -t spark-hadoop:3.2.0 -f ./docker/Dockerfile ./docker
 ```
 
@@ -123,3 +117,7 @@ $ minikube delete
 * Removing /home/osboxes/.minikube/machines/minikube ...
 * Removed all traces of the "minikube" cluster.
 ```
+
+## Fuente
+
+Ver [post](https://testdriven.io/deploying-spark-on-kubernetes).
