@@ -9,8 +9,8 @@ Clonar el repositorio. Nos aseguraremos de que nuestro directorio de trabajo es 
 Si no está ya hecho, instalar [Minikube](https://kubernetes.io/docs/setup/minikube/). Iniciamos Minikube con:
 
 ```sh
-$ minikube start
-$ eval $(minikube docker-env)
+minikube start
+eval $(minikube docker-env)
 ```
 
 ## Puesta en marcha del clúster Spark
@@ -18,30 +18,30 @@ $ eval $(minikube docker-env)
 Construir la imagen Docker image:
 
 ```sh
-$ docker build -t spark-hadoop:3.2.0 -f ./docker/Dockerfile ./docker
+docker build -t spark-hadoop:3.2.0 -f ./docker/Dockerfile ./docker
 ```
 
 Alternativa más rápida a "docker build": descarga la imagen la lista de Docker Hub y reetiquétala:
 ```sh
-$ docker pull acpmialj/ipmd:spark_hadoop_3.2.0
-$ docker tag acpmialj/ipmd:spark_hadoop_3.2.0 spark-hadoop:3.2.0
+docker pull acpmialj/ipmd:spark_hadoop_3.2.0
+docker tag acpmialj/ipmd:spark_hadoop_3.2.0 spark-hadoop:3.2.0
 ```
 
 
 Creamos deployments y services:
 
 ```sh
-$ kubectl create -f ./kubernetes/spark-master-deployment.yaml
-$ kubectl create -f ./kubernetes/spark-master-service.yaml
-$ kubectl create -f ./kubernetes/spark-worker-deployment.yaml
-$ minikube addons enable ingress
+kubectl create -f ./kubernetes/spark-master-deployment.yaml
+kubectl create -f ./kubernetes/spark-master-service.yaml
+kubectl create -f ./kubernetes/spark-worker-deployment.yaml
+minikube addons enable ingress
 # Es posible que el siguiente comando haya que ejecutarlo un par de veces, tarda
-$ kubectl apply -f ./kubernetes/minikube-ingress.yaml
+kubectl apply -f ./kubernetes/minikube-ingress.yaml
 ```
 
 Vemos nuestros contenedores. Nos fijamos en el nombre y la dirección IP del que empieza por spark-master:
 ```sh
-$ kubectl get pods -o wide
+kubectl get pods -o wide
 
 NAME                            READY   STATUS    RESTARTS   AGE     IP           NODE       NOMINATED NODE   READINESS GATES
 spark-master-dbc47bc9-t6v84     1/1     Running   0          7m35s   172.17.0.6   minikube   <none>           <none>
@@ -58,7 +58,7 @@ Y luego conectarnos vía web a: http://spark-kubernetes/.
 Lanzamos pyspark en el master. Tenemos que usar el nombre y la dirección IP correspondiente:
 
 ```sh
-$ kubectl exec spark-master-dbc47bc9-t6v84 -it -- \
+kubectl exec spark-master-dbc47bc9-t6v84 -it -- \
     pyspark --conf spark.driver.bindAddress=172.17.0.6 --conf spark.driver.host=172.17.0.6
 ```
 
@@ -94,24 +94,24 @@ SparkSession available as 'spark'.
 Podemos hacer operaciones de limpieza
 
 ```sh
-$ kubectl get deployment
+kubectl get deployment
 NAME           READY   UP-TO-DATE   AVAILABLE   AGE
 spark-master   1/1     1            1           65m
 spark-worker   2/2     2            2           65m
 
-$ kubectl get service
+kubectl get service
 NAME           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
 kubernetes     ClusterIP   10.96.0.1       <none>        443/TCP             71m
 spark-master   ClusterIP   10.106.195.67   <none>        8080/TCP,7077/TCP   65m
 
-$ kubectl delete deployment spark-master
-deployment.apps "spark-master" deleted
-$ kubectl delete deployment spark-worker
-deployment.apps "spark-worker" deleted
-$ kubectl delete service spark-master
-service "spark-master" deleted
+kubectl delete deployment spark-master
+# deployment.apps "spark-master" deleted
+kubectl delete deployment spark-worker
+# deployment.apps "spark-worker" deleted
+kubectl delete service spark-master
+# service "spark-master" deleted
 
-$ minikube delete
+minikube delete
 * Deleting "minikube" in docker ...
 * Deleting container "minikube" ...
 * Removing /home/osboxes/.minikube/machines/minikube ...
