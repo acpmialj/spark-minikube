@@ -94,28 +94,34 @@ SparkSession available as 'spark'.
 Podemos hacer operaciones de limpieza
 
 ```sh
-kubectl get deployment
+$ kubectl get deployment
 NAME           READY   UP-TO-DATE   AVAILABLE   AGE
 spark-master   1/1     1            1           65m
 spark-worker   2/2     2            2           65m
 
-kubectl get service
+$ kubectl get service
 NAME           TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)             AGE
-kubernetes     ClusterIP   10.96.0.1       <none>        443/TCP             71m
-spark-master   ClusterIP   10.106.195.67   <none>        8080/TCP,7077/TCP   65m
+kubernetes      ClusterIP   10.96.0.1       <none>        443/TCP             104d
+spark-master    ClusterIP   10.103.199.43   <none>        8080/TCP,7077/TCP   13m
 
-kubectl delete deployment spark-master
-# deployment.apps "spark-master" deleted
-kubectl delete deployment spark-worker
-# deployment.apps "spark-worker" deleted
-kubectl delete service spark-master
-# service "spark-master" deleted
+$ kubectl get ingress
+NAME               CLASS   HOSTS              ADDRESS        PORTS   AGE
+minikube-ingress   nginx   spark-kubernetes   192.168.49.2   80      12m
 
-minikube delete
-* Deleting "minikube" in docker ...
-* Deleting container "minikube" ...
-* Removing /home/osboxes/.minikube/machines/minikube ...
-* Removed all traces of the "minikube" cluster.
+$ kubectl delete deployment spark-master spark-worker
+deployment.apps "spark-master" deleted
+deployment.apps "spark-worker" deleted
+
+$ kubectl delete service spark-master
+service "spark-master" deleted
+
+$ kubectl delete ingress minikube-ingress
+ingress.networking.k8s.io "minikube-ingress" deleted
+
+$ minikube stop # or minikube delete
+✋  Stopping node "minikube"  ...
+🛑  Powering off "minikube" via SSH ...
+🛑  1 node stopped.
 ```
 
 ## Fuente
