@@ -1,4 +1,5 @@
 # Despliegue de Spark con Kubernetes
+Instrucciones para Minikube. Si se usa Docker Desktop cambian algunas cosas. Ver al final de este documento. 
 
 ## Clonar este repositorio
 
@@ -124,6 +125,49 @@ $ minikube stop # or minikube delete
 🛑  1 node stopped.
 ```
 
+## Instrucciones para Docker Desktop
+
+Habilitamos el clúster Kubernetes de Docker Desktop desde su GUI. Cuando esté en marcha, abrimos un terminal Ubuntu. En el mismo, damos estos pasos
+
+1. Habilitar el controlador de Ingress basado en NGINX. Esperar a que todo esté en marcha
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.1/deploy/static/provider/cloud/deploy.yaml
+kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=120s
+```
+2. Clonar el repositorio
+```
+git clone https://github.com/acpmialj/spark-minikube.git 
+cd spark-minikube
+```
+3. Descargar la imagen
+```
+docker pull acpmialj/ipmd:spark_hadoop_3.2.0
+docker tag acpmialj/ipmd:spark_hadoop_3.2.0 spark-hadoop:3.2.0
+```
+4. Desplegar el clúster: 
+```
+source create.sh
+```
+5. Ver que todo está en marcha
+```
+kubectl get all
+kubectl get ingress
+```
+6. Acceder al webUI de Spark: http://spark-kubernetes/. Para que esto funcione, hemos tenido que añadir la línea "127.0.0.1 spark-kubernetes" al fichero "C:\Windows\System32\drivers\etc\hosts". Para ello abrimos primero el editor de textos notepad como administrador. 
+7. Recogemos el nombre del máster y de la dirección IP interna en la que está. Sea "spark-master-6bc899886b-nqvbb", "10.1.0.24". Ejecutamos
+```
+kubectl exec spark-master-6bc899886b-nqvbb -it -- \
+    pyspark --conf spark.driver.bindAddress=10.1.0.24 --conf spark.driver.host=10.1.0.24
+```
+8. Una vez en PySpark, ejecutamos algunos comandos. Salimos con exit()
+9. Limpiamos 
+```
+source delete.sh
+```
+9. Podemos eliminar el controlador ingress:
+```
+kubectl delete -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.10.1/deploy/static/provider/cloud/deploy.yaml
+```
 ## Fuente
 
 Ver [post](https://testdriven.io/deploying-spark-on-kubernetes).
