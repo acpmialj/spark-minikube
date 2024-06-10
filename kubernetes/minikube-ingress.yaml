@@ -4,6 +4,7 @@ metadata:
   name: minikube-ingress
   annotations:
 spec:
+  ingressClassName: nginx
   rules:
   - host: spark-kubernetes
     http:
