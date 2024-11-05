@@ -40,7 +40,7 @@ minikube addons enable ingress
 kubectl apply -f ./kubernetes/minikube-ingress.yaml
 ```
 
-Vemos nuestros pods. Nos fijamos en el nombre y la dirección IP del que empieza por spark-master:
+Vemos nuestros pods. Nos fijamos en el nombre y, sobre todo, en la dirección IP del que empieza por spark-master:
 ```sh
 kubectl get pods -o wide
 
@@ -56,11 +56,10 @@ echo "$(minikube ip) spark-kubernetes" | sudo tee -a /etc/hosts
 ```
 Y luego conectarnos vía web a: http://spark-kubernetes/. 
 
-Lanzamos pyspark en el master. Tenemos que usar el nombre y la dirección IP correspondiente:
+Lanzamos pyspark en el master. Tenemos que usar la dirección IP correspondiente al pod spark-master (172.17.0.6):
 
 ```sh
-kubectl exec spark-master-dbc47bc9-t6v84 -it -- \
-    pyspark --conf spark.driver.bindAddress=172.17.0.6 --conf spark.driver.host=172.17.0.6
+kubectl exec spark-master-dbc47bc9-t6v84 -it -- pyspark --conf spark.driver.host=172.17.0.6
 ```
 
 Una vez veamos el prompt, (si no aparece, pulsar Return) podremos escribir código Python.
@@ -74,12 +73,11 @@ Welcome to
       /_/
 
 Using Python version 3.9.2 (default, Feb 28 2021 17:03:44)
-Spark context Web UI available at http://172.17.0.3:4040
+Spark context Web UI available at http://172.17.0.6:4040
 Spark context available as 'sc' (master = spark://spark-master:7077, app id = app-20221118101454-0000).
 SparkSession available as 'spark'.
 >>>
->>> words = 'the quick brown fox jumps over the\
-...         lazy dog the quick brown fox jumps over the lazy dog'
+>>> words = 'the quick brown fox jumps over the lazy dog the quick brown fox jumps over the lazy dog'
 >>> sc = SparkContext.getOrCreate()
 >>> seq = words.split()
 >>> data = sc.parallelize(seq)
