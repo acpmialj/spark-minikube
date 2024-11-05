@@ -40,7 +40,7 @@ minikube addons enable ingress
 kubectl apply -f ./kubernetes/minikube-ingress.yaml
 ```
 
-Vemos nuestros contenedores. Nos fijamos en el nombre y la dirección IP del que empieza por spark-master:
+Vemos nuestros pods. Nos fijamos en el nombre y la dirección IP del que empieza por spark-master:
 ```sh
 kubectl get pods -o wide
 
@@ -154,7 +154,7 @@ kubectl get all
 kubectl get ingress
 ```
 6. Acceder al webUI de Spark: http://spark-kubernetes/. Para que esto funcione, hemos tenido que añadir la línea "127.0.0.1 spark-kubernetes" al fichero "C:\Windows\System32\drivers\etc\hosts". Para ello abrimos primero el editor de textos notepad como administrador. 
-7. Recogemos el nombre del máster y de la dirección IP interna en la que está. Sea "spark-master-6bc899886b-nqvbb", "10.1.0.24". Ejecutamos
+7. Recogemos con "kubectl get pods -o wide" el nombre del máster y de la dirección IP interna en la que está. Sea "spark-master-6bc899886b-nqvbb", "10.1.0.24". Ejecutamos
 ```
 kubectl exec spark-master-6bc899886b-nqvbb -it -- \
     pyspark --conf spark.driver.bindAddress=10.1.0.24 --conf spark.driver.host=10.1.0.24
