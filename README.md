@@ -16,18 +16,19 @@ eval $(minikube docker-env)
 
 ## Puesta en marcha del clúster Spark
 
-Construir la imagen Docker image:
+Necesitamos una imagen Docker con Spark. Podemos descargar una ya pre-configurada:
 
-```sh
-docker build -t spark-hadoop:3.2.0 -f ./docker/Dockerfile ./docker
-```
-
-Alternativa más rápida a "docker build": descarga la imagen la lista de Docker Hub y reetiquétala:
 ```sh
 docker pull acpmialj/ipmd:spark_hadoop_3.2.0
 docker tag acpmialj/ipmd:spark_hadoop_3.2.0 spark-hadoop:3.2.0
 ```
 
+O bien podemos crearla con Docker build:
+
+```sh
+docker build -t spark-hadoop:3.2.0 -f ./docker/Dockerfile ./docker
+```
+La primera alternativa es más rápida. 
 
 Creamos deployments y services:
 
@@ -44,10 +45,10 @@ Vemos nuestros pods. Nos fijamos en el nombre y, sobre todo, en la dirección IP
 ```sh
 kubectl get pods -o wide
 
-NAME                            READY   STATUS    RESTARTS   AGE     IP           NODE       NOMINATED NODE   READINESS GATES
-spark-master-dbc47bc9-t6v84     1/1     Running   0          7m35s   172.17.0.6   minikube   <none>           <none>
-spark-worker-795dc47587-5ch8f   1/1     Running   0          7m24s   172.17.0.9   minikube   <none>           <none>
-spark-worker-795dc47587-fvcf6   1/1     Running   0          7m24s   172.17.0.7   minikube   <none>           <none>
+NAME                            READY   STATUS    RESTARTS   AGE   IP           NODE       NOMINATED NODE   READINESS GATES
+spark-master-d89f64bf6-m5xwx    1/1     Running   0          97s   10.244.0.4   minikube   <none>           <none>
+spark-worker-5f8bf4bbd4-6vr92   1/1     Running   0          96s   10.244.0.6   minikube   <none>           <none>
+spark-worker-5f8bf4bbd4-pw6n7   1/1     Running   0          96s   10.244.0.5   minikube   <none>           <none>
 ```
 
 Si todo va bien, podemos hacer una modificación en /etc/hosts para poder conectarnos al Web UI del Spark master:
@@ -56,10 +57,10 @@ echo "$(minikube ip) spark-kubernetes" | sudo tee -a /etc/hosts
 ```
 Y luego conectarnos vía web a: http://spark-kubernetes/. 
 
-Lanzamos pyspark en el master. Tenemos que usar la dirección IP correspondiente al pod spark-master (172.17.0.6):
+Lanzamos pyspark en el master. Tenemos que usar la dirección IP correspondiente al pod spark-master (10.244.0.4):
 
 ```sh
-kubectl exec spark-master-dbc47bc9-t6v84 -it -- pyspark --conf spark.driver.host=172.17.0.6
+kubectl exec svc/spark-master -it -- pyspark --conf spark.driver.host=10.244.0.4 
 ```
 
 Una vez veamos el prompt, (si no aparece, pulsar Return) podremos escribir código Python.
@@ -73,8 +74,8 @@ Welcome to
       /_/
 
 Using Python version 3.9.2 (default, Feb 28 2021 17:03:44)
-Spark context Web UI available at http://172.17.0.6:4040
-Spark context available as 'sc' (master = spark://spark-master:7077, app id = app-20221118101454-0000).
+Spark context Web UI available at http://10.244.0.4:4040
+Spark context available as 'sc' (master = spark://spark-master:7077, app id = app-20241105115225-0000).
 SparkSession available as 'spark'.
 >>>
 >>> words = 'the quick brown fox jumps over the lazy dog the quick brown fox jumps over the lazy dog'
@@ -116,7 +117,12 @@ service "spark-master" deleted
 
 $ kubectl delete ingress minikube-ingress
 ingress.networking.k8s.io "minikube-ingress" deleted
+```
 
+Todo lo anterior se puede hacer con "source ./delete.sh". 
+
+Si lo consideramos oportuno, podemos parar o borrar el clúster Minikube:
+```
 $ minikube stop # or minikube delete
 ✋  Stopping node "minikube"  ...
 🛑  Powering off "minikube" via SSH ...
@@ -152,10 +158,9 @@ kubectl get all
 kubectl get ingress
 ```
 6. Acceder al webUI de Spark: http://spark-kubernetes/. Para que esto funcione, hemos tenido que añadir la línea "127.0.0.1 spark-kubernetes" al fichero "C:\Windows\System32\drivers\etc\hosts". Para ello abrimos primero el editor de textos notepad como administrador. 
-7. Recogemos con "kubectl get pods -o wide" el nombre del máster y de la dirección IP interna en la que está. Sea "spark-master-6bc899886b-nqvbb", "10.1.0.24". Ejecutamos
+7. Recogemos con "kubectl get pods -o wide" la dirección IP interna del spark-master (pod "spark-master-6bc899886b-nqvbb" o similar). Sea esta dirección "10.1.0.144". Ejecutamos
 ```
-kubectl exec spark-master-6bc899886b-nqvbb -it -- \
-    pyspark --conf spark.driver.bindAddress=10.1.0.24 --conf spark.driver.host=10.1.0.24
+kubectl exec svc/spark-master -it -- pyspark --conf spark.driver.host=10.1.0.144
 ```
 8. Una vez en PySpark, ejecutamos algunos comandos. Salimos con exit()
 9. Limpiamos 
